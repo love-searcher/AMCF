@@ -18,6 +18,7 @@ class AMCF(nn.Module):
         self.u_bias = nn.Parameter(torch.randn(num_user))
         self.i_bias = nn.Parameter(torch.randn(num_item))
         self.asp_emb = Aspect_emb(num_asp, e_dim)
+        # mlp 没有进行非线性变换，等价于只用一层线性变换
         self.mlp = nn.Sequential(nn.Linear(e_dim, 50), nn.Linear(50, 25), nn.Linear(25, num_asp))
         self.e_dim = e_dim
         self.pdist = nn.PairwiseDistance(p=2) # used to calculate pairwise distance
@@ -47,7 +48,7 @@ class AMCF(nn.Module):
         user_latent = user_latent.unsqueeze(-1)
         pref = torch.bmm(asp_latent, user_latent).squeeze(-1) #[batch, num_asp]
 
-        return [out, sim, pref]
+        return [out, sim, pref] # out为rating, 
 
     def predict_pref(self, x):
     
@@ -101,6 +102,4 @@ class Aspect_emb(nn.Module):
         asp_latent = torch.mul(x, self.W) # [batch_size, num_asp, e_dim]
         # we can optionally normalize asp_latent per aspect
         # asp_latent = F.normalize(asp_latent, p=2, dim=2) #
-        
-
         return asp_latent

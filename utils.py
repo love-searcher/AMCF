@@ -1,7 +1,7 @@
 import numpy as np
 
 def get_train_instances(train, num_negatives, num_items, num_neg):
-    num = train.nnz * (num_neg + 1)
+    num = train.nnz * (num_neg + 1)  # 对每个正样例，增加num_neg个负样例
     user_input, item_input, labels = np.zeros(num), np.zeros(num), np.zeros(num)
     idx = 0
     for (u, i) in train.keys():

@@ -80,7 +80,7 @@ def convert_100k(source_dir, target_dir):
     data = pd.read_csv(source_data, sep='\t', names=col_names)
     data['uid'] = data['uid'].apply(lambda x: x - 1)
     data['mid'] = data['mid'].apply(lambda x: x - 1)
-    data = data.sort_values(by=['uid'], axis=0).reset_index(drop=True)
+    data = data.sort_values(by=['uid'], axis=0).reset_index(drop=True) # 排序后重设index
 
     data.to_csv(target_data, index=False)
 
@@ -97,7 +97,7 @@ def convert_100k(source_dir, target_dir):
                      'Animation', 'Children', 'Comedy', 'Crime',
                      'Documentary', 'Drama', 'Fantasy', 'Film-Noir',
                      'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi',
-                     'Thriller', 'War', 'Western']]
+                     'Thriller', 'War', 'Western']] # 截取genre部分
     movies['mid'] = movies['mid'].apply(lambda x: x - 1)
     movies.to_csv(target_movie, index=False)
 
@@ -149,11 +149,11 @@ def genre_to_int_list(genre_string):
     GENRES = ('Action', 'Adventure', 'Animation', 'Children', 'Comedy',
               'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir',
               'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller',
-              'War', 'Western')
+              'War', 'Western') # 需要手动提取类别
     GENRES_LC = tuple((x.lower() for x in GENRES))
     # convert to lower case
     genre_string_lc = genre_string.lower()
-    genre_list = []
+    genre_list = [] # 生成genre multi-hot vector
     for idx in range(len(GENRES_LC)):
         if GENRES_LC[idx] in genre_string_lc:
             genre_list.append(1)
@@ -171,8 +171,9 @@ def sample_negative(ratings):
     # user_pool = set(ratings['userId'].unique())
     item_pool = set(ratings['mid'].unique())
 
+    # 用户的interacted items和negative items不同
     interact_status = ratings.groupby('uid')['mid'].apply(set)\
-        .reset_index().rename(columns={'mid': 'interacted_items'})
+        .reset_index().rename(columns={'mid': 'interacted_items'})  #将col名为mid的列，重命名为interacted items
     interact_status['negative_items'] = interact_status['interacted_items']\
         .apply(lambda x: item_pool - x)
     interact_status['negative_samples'] = interact_status['negative_items']\
@@ -183,7 +184,7 @@ def sample_negative(ratings):
 def split_train_test(ratings):
     """return training set and test set by loo"""
     ratings['rank_latest'] = ratings.groupby(['uid'])['timestamp']\
-        .rank(method='first', ascending=False)
+        .rank(method='first', ascending=False)    # 给予rank 标签（从1开始）但在存储上不排序
     test = ratings[ratings['rank_latest'] == 1]
     train = ratings[ratings['rank_latest'] > 1]
     assert train['uid'].nunique() == test['uid'].nunique()

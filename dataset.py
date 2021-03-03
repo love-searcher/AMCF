@@ -16,6 +16,7 @@ def get_data(size='100k', batch_size=256):
         path = 'ymovies/clean_data.txt'
     else:
         raise Exception('not supported dataset!')
+    
     data = pd.read_csv(path)
     data = data.values # convert to numpy array
     inps = data[:, 0:2].astype(int) # get user, item inputs
